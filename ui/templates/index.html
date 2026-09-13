@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Query Trials</title>
+<style>
+  :root{
+    --bg:#FAFAFB;
+    --surface:#FFFFFF;
+    --ink:#0F172A;
+    --ink-2:#334155;
+    --ink-3:#64748B;
+    --ink-4:#94A3B8;
+    --line:#E2E8F0;
+    --line-2:#F1F5F9;
+    --indigo:#4F46E5;
+    --indigo-2:#4338CA;
+    --indigo-bg:#EEF2FF;
+    --green:#166534;  --green-bg:#DCFCE7;  --green-line:#BBF7D0;
+    --red:#B91C1C;    --red-bg:#FEF2F2;    --red-line:#FECACA;
+    --amber:#92400E;  --amber-bg:#FFFBEB;  --amber-line:#FDE68A;
+    --r:10px;
+    --shadow:0 1px 2px rgba(15,23,42,.04), 0 1px 3px rgba(15,23,42,.06);
+    --shadow-lg:0 4px 12px rgba(15,23,42,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);color:var(--ink);
+    font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--indigo-bg)}
+
+  /* ---------------- top bar ---------------- */
+  .topbar{
+    background:var(--surface);border-bottom:1px solid var(--line);
+    position:sticky;top:0;z-index:20;
+  }
+  .topbar-in{
+    max-width:1120px;margin:0 auto;padding:0 28px;height:60px;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+  }
+  .brand{display:flex;align-items:center;gap:10px}
+  .logo{
+    width:28px;height:28px;border-radius:8px;background:var(--indigo);
+    color:#fff;display:grid;place-items:center;font-size:14px;font-weight:700;
+    letter-spacing:-.04em;flex:0 0 auto;
+  }
+  .brand h1{margin:0;font-size:16px;font-weight:650;letter-spacing:-.02em}
+  .badges{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+  .pill{
+    font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;
+    background:var(--indigo-bg);color:var(--indigo-2);white-space:nowrap;
+  }
+  .pill.plain{background:var(--line-2);color:var(--ink-3)}
+
+  .page{max-width:1120px;margin:0 auto;padding:0 28px 80px}
+
+  /* ---------------- tabs ---------------- */
+  .tabs{display:flex;gap:4px;margin:26px 0 24px;
+        background:var(--line-2);padding:4px;border-radius:10px;width:fit-content}
+  .tab{
+    font:inherit;font-size:13.5px;font-weight:600;color:var(--ink-3);
+    background:transparent;border:none;padding:8px 18px;border-radius:7px;
+    cursor:pointer;transition:.15s;
+  }
+  .tab:hover{color:var(--ink-2)}
+  .tab.on{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+  .panel{display:none}
+  .panel.on{display:block}
+
+  /* ---------------- cards ---------------- */
+  .card{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+    padding:20px;margin-bottom:16px;box-shadow:var(--shadow);
+  }
+  .eyebrow{
+    font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--ink-4);margin-bottom:10px;
+  }
+
+  /* ---------------- composer ---------------- */
+  textarea{
+    width:100%;min-height:86px;padding:14px 16px;
+    font:15.5px/1.6 inherit;color:var(--ink);background:var(--surface);
+    border:1px solid var(--line);border-radius:9px;resize:vertical;
+    transition:border-color .15s,box-shadow .15s;
+  }
+  textarea::placeholder{color:var(--ink-4)}
+  textarea:focus{outline:none;border-color:var(--indigo);
+                 box-shadow:0 0 0 3px rgba(79,70,229,.12)}
+
+  .chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+  .chip{
+    font:inherit;font-size:12.5px;color:var(--ink-3);cursor:pointer;
+    background:var(--surface);border:1px solid var(--line);
+    border-radius:20px;padding:6px 13px;transition:.15s;
+  }
+  .chip:hover{border-color:var(--indigo);color:var(--indigo-2);
+              background:var(--indigo-bg)}
+
+  .toolbar{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    flex-wrap:wrap;margin-top:18px;padding-top:16px;border-top:1px solid var(--line-2);
+  }
+  .segs{display:flex;gap:6px;flex-wrap:wrap}
+  .seg{
+    display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;
+    font-size:13px;font-weight:500;color:var(--ink-2);
+    background:var(--surface);border:1px solid var(--line);
+    border-radius:8px;padding:7px 13px;transition:.15s;
+  }
+  .seg:hover{border-color:#CBD5E1;background:var(--line-2)}
+  .seg:has(input:checked){
+    background:var(--indigo);border-color:var(--indigo);color:#fff;font-weight:600;
+  }
+  .seg input{position:absolute;opacity:0;width:0;height:0}
+  .seg .dot{width:7px;height:7px;border-radius:50%;flex:0 0 auto;opacity:.9}
+  .seg:has(input:checked) .dot{background:#fff !important}
+
+  .btn{
+    font:inherit;font-size:14px;font-weight:600;color:#fff;background:var(--indigo);
+    border:none;border-radius:8px;padding:10px 24px;cursor:pointer;
+    transition:.15s;box-shadow:var(--shadow);
+  }
+  .btn:hover:not(:disabled){background:var(--indigo-2)}
+  .btn:disabled{opacity:.5;cursor:default}
+  .kbd{
+    font-size:11px;color:var(--ink-4);margin-left:10px;
+    font-family:ui-monospace,Menlo,monospace;
+  }
+  .help{font-size:12.5px;color:var(--ink-4);margin-top:14px;line-height:1.6}
+  code{
+    font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:12px;
+    background:var(--line-2);padding:2px 6px;border-radius:5px;color:var(--ink-2);
+  }
+
+  .alert{
+    background:var(--amber-bg);border:1px solid var(--amber-line);
+    border-radius:9px;padding:13px 16px;font-size:13.5px;color:var(--amber);
+    margin-bottom:16px;
+  }
+  .alert.bad{background:var(--red-bg);border-color:var(--red-line);color:var(--red)}
+  .alert strong{font-weight:650}
+
+  /* ---------------- result ---------------- */
+  .rhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .rhead h3{margin:0;font-size:16px;font-weight:650;letter-spacing:-.01em}
+  .tagline{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--ink-4)}
+  .status{
+    font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+    padding:3px 9px;border-radius:6px;
+  }
+  .status.ok{background:var(--green-bg);color:var(--green)}
+  .status.bad{background:var(--red-bg);color:var(--red)}
+
+  .stats{display:flex;gap:28px;flex-wrap:wrap;margin-bottom:16px}
+  .stats small{
+    display:block;font-size:10.5px;font-weight:700;letter-spacing:.05em;
+    text-transform:uppercase;color:var(--ink-4);margin-bottom:2px;
+  }
+  .stats span{font-size:17px;font-weight:650;letter-spacing:-.02em;
+              font-variant-numeric:tabular-nums}
+
+  pre{
+    margin:0;padding:13px 15px;overflow-x:auto;
+    background:#F8FAFC;border:1px solid var(--line);border-radius:8px;
+    font:12.5px/1.7 ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    color:var(--ink-2);
+  }
+  pre.err{background:var(--red-bg);border-color:var(--red-line);color:var(--red)}
+  pre .kw{color:var(--indigo-2);font-weight:600}
+  pre .st{color:#0E7490}
+  pre .nm{color:#B45309}
+
+  .tbl{margin-top:14px;border:1px solid var(--line);border-radius:8px;
+       overflow:hidden}
+  .scroll{max-height:320px;overflow:auto}
+  table{border-collapse:collapse;width:100%;font-size:13px;
+        font-variant-numeric:tabular-nums}
+  thead th{
+    position:sticky;top:0;background:var(--surface);color:var(--ink-4);
+    text-align:left;padding:9px 14px;font-size:10.5px;font-weight:700;
+    letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;
+    border-bottom:1px solid var(--line);
+  }
+  td{padding:9px 14px;border-bottom:1px solid var(--line-2);color:var(--ink-2);
+     white-space:nowrap}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover td{background:#FAFAFB}
+
+  .empty{text-align:center;padding:56px 24px}
+  .empty .icon{
+    width:44px;height:44px;border-radius:12px;background:var(--line-2);
+    margin:0 auto 14px;display:grid;place-items:center;font-size:20px;
+  }
+  .empty .big{font-size:16px;font-weight:650;margin-bottom:5px}
+  .empty p{margin:0;font-size:13.5px;color:var(--ink-4)}
+
+  .loading{display:flex;align-items:center;gap:11px;font-size:13.5px;color:var(--ink-3)}
+  .spinner{
+    width:15px;height:15px;border:2px solid var(--line);border-top-color:var(--indigo);
+    border-radius:50%;animation:spin .7s linear infinite;flex:0 0 auto;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  footer{max-width:1120px;margin:0 auto;padding:0 28px 44px;
+         font-size:12px;color:var(--ink-4)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <div class="logo">Q</div>
+      <h1>Query Trials</h1>
+    </div>
+    <div class="badges">
+      <span class="pill">3 models</span>
+      <span class="pill plain">temp 0</span>
+      <span class="pill plain">prompt {{ prompt_hash }}</span>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+  <div class="tabs">
+    <button class="tab on" data-p="compare">Compare</button>
+    <button class="tab" data-p="results">Results</button>
+  </div>
+
+  <!-- ============ COMPARE ============ -->
+  <div class="panel on" id="compare">
+    {% if not db_ready %}
+    <div class="alert">
+      <strong>No database yet.</strong> Run <code>python data/build_db.py</code>
+      once the CSVs are in <code>data/raw/</code>.
+    </div>
+    {% endif %}
+
+    <div class="card">
+      <div class="eyebrow">Question</div>
+      <textarea id="q" placeholder="Ask in plain English — e.g. which departments pay above the company average?"></textarea>
+
+      <div class="chips">
+        <button class="chip" data-q="How many employees are in the database?">Employee count</button>
+        <button class="chip" data-q="Which departments currently have more than 10,000 employees?">Large departments</button>
+        <button class="chip" data-q="Which departments have an average current salary above the company-wide average current salary?">Above-average pay</button>
+        <button class="chip" data-q="Which departments have had more than two different managers, and who is the current one?">Manager history</button>
+      </div>
+
+      <div class="toolbar">
+        <div class="segs">
+          {% for key, m in models.items() %}
+          <label class="seg">
+            <input type="checkbox" value="{{ key }}" {% if key == 'local' %}checked{% endif %}>
+            <span class="dot" style="background:{{ {'top':'#4F46E5','cheap':'#0EA5E9','local':'#10B981'}[key] }}"></span>
+            {{ m.label }}
+          </label>
+          {% endfor %}
+        </div>
+        <div>
+          <button class="btn" id="run">Run query</button>
+          <span class="kbd">⌘↵</span>
+        </div>
+      </div>
+
+      <div class="help">
+        Every model gets the identical prompt at temperature&nbsp;0 — the same
+        conditions as the graded run. Only read-only <code>SELECT</code>
+        statements are executed.
+      </div>
+    </div>
+
+    <div id="out"></div>
+  </div>
+
+  <!-- ============ RESULTS ============ -->
+  <div class="panel" id="results">
+    <div id="rout">
+      <div class="card"><div class="loading"><span class="spinner"></span>Loading…</div></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Employees dataset · 6 tables · 300,024 people · 967,330 salary records ·
+  <code>to_date = '9999-01-01'</code> means still current
+</footer>
+
+<script>
+const $  = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const num = n => (n ?? 0).toLocaleString();
+
+const KEYWORDS = /\b(SELECT|FROM|WHERE|JOIN|LEFT|RIGHT|INNER|OUTER|ON|GROUP BY|ORDER BY|HAVING|LIMIT|AS|AND|OR|NOT|IN|EXISTS|DISTINCT|COUNT|SUM|AVG|MIN|MAX|ROUND|CASE|WHEN|THEN|ELSE|END|WITH|UNION|DESC|ASC|IS|NULL|OVER|PARTITION)\b/gi;
+
+function sql(s){
+  return esc(s)
+    .replace(/'[^']*'/g, m => `<span class="st">${m}</span>`)
+    .replace(KEYWORDS, m => `<span class="kw">${m.toUpperCase()}</span>`)
+    .replace(/\b(\d+\.?\d*)\b/g, '<span class="nm">$1</span>');
+}
+
+/* tabs */
+$$(".tab").forEach(t => t.onclick = () => {
+  $$(".tab").forEach(x => x.classList.remove("on"));
+  $$(".panel").forEach(x => x.classList.remove("on"));
+  t.classList.add("on");
+  $("#" + t.dataset.p).classList.add("on");
+  if (t.dataset.p === "results") loadResults();
+});
+
+$$(".chip").forEach(c => c.onclick = () => { $("#q").value = c.dataset.q; $("#q").focus(); });
+
+$("#q").addEventListener("keydown", e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") $("#run").click();
+});
+
+$("#run").onclick = async () => {
+  const question = $("#q").value.trim();
+  const models = $$(".seg input:checked").map(i => i.value);
+  if (!question) { $("#q").focus(); return; }
+  if (!models.length) {
+    $("#out").innerHTML = `<div class="alert">Select at least one model.</div>`;
+    return;
+  }
+
+  $("#run").disabled = true;
+  $("#out").innerHTML = `<div class="card"><div class="loading"><span class="spinner"></span>
+    Running on ${models.length} model${models.length > 1 ? "s" : ""}… the local one takes a moment.</div></div>`;
+
+  try {
+    const r = await fetch("/api/ask", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({question, models})
+    });
+    // The server may return an HTML traceback instead of JSON. Read the text
+    // first so we can show the real error rather than a JSON.parse failure.
+    const raw = await r.text();
+    let d;
+    try {
+      d = JSON.parse(raw);
+    } catch {
+      const plain = raw.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+      $("#out").innerHTML = `<div class="alert bad">
+        <strong>Server error ${r.status}.</strong> The full traceback is in the
+        terminal running <code>python -m ui.app</code>.</div>
+        <div class="card"><pre class="err">${esc(plain.slice(0, 900))}</pre></div>`;
+      return;
+    }
+    $("#out").innerHTML = d.error
+      ? `<div class="alert bad">${esc(d.error)}</div>`
+      : d.results.map(card).join("");
+  } catch (e) {
+    $("#out").innerHTML = `<div class="alert bad">${esc(e)}</div>`;
+  } finally {
+    $("#run").disabled = false;
+  }
+};
+
+function stat(label, value){
+  return `<div><small>${label}</small><span>${value}</span></div>`;
+}
+
+function card(r){
+  const good = r.status === "ok";
+
+  let stats = stat("Latency", r.latency_ms != null ? `${num(Math.round(r.latency_ms))} ms` : "—");
+  if (r.prompt_tokens)     stats += stat("Tokens in", num(r.prompt_tokens));
+  if (r.completion_tokens) stats += stat("Tokens out", num(r.completion_tokens));
+  if (r.tokens_per_sec)    stats += stat("Speed", `${r.tokens_per_sec}/s`);
+  if (good && r.total_rows != null) stats += stat("Rows", num(r.total_rows));
+
+  let body;
+  if (r.error) {
+    body = `<pre class="err">${esc(r.error)}</pre>`;
+  } else {
+    body = `<pre>${r.sql ? sql(r.sql) : "(no output)"}</pre>`;
+    if (good && r.columns.length) {
+      body += `<div class="tbl"><div class="scroll"><table>
+          <thead><tr>${r.columns.map(c => `<th>${esc(c)}</th>`).join("")}</tr></thead>
+          <tbody>${r.rows.map(row =>
+            `<tr>${row.map(c => `<td>${esc(c)}</td>`).join("")}</tr>`).join("")}
+          </tbody></table></div></div>` +
+        (r.total_rows > r.rows.length
+          ? `<div class="help">Showing first ${num(r.rows.length)} of ${num(r.total_rows)} rows.</div>` : "");
+    } else if (!good) {
+      body += `<div class="help">${esc(r.status)}</div>`;
+    }
+  }
+
+  return `<div class="card">
+    <div class="rhead">
+      <h3>${esc(r.label)}</h3>
+      <span class="status ${good ? "ok" : "bad"}">${esc(r.status || "error")}</span>
+      <span class="tagline">${esc(r.model_name || "")}</span>
+    </div>
+    <div class="stats">${stats}</div>
+    ${body}</div>`;
+}
+
+/* ---------- results ---------- */
+async function loadResults(){
+  const box = $("#rout");
+  box.innerHTML = `<div class="card"><div class="loading"><span class="spinner"></span>Loading…</div></div>`;
+  const d = await (await fetch("/api/results")).json();
+
+  if (!d.summary) {
+    box.innerHTML = `<div class="card"><div class="empty">
+      <div class="icon">📊</div>
+      <div class="big">No results yet</div>
+      <p><code>results/summary.csv</code> appears after the scoring run.</p>
+    </div></div>`;
+    return;
+  }
+
+  const cols = Object.keys(d.summary[0]);
+  let html = `<div class="card">
+    <div class="eyebrow">Summary${d.n_items ? " · " + num(d.n_items) + " graded items" : ""}</div>
+    <div class="tbl"><div class="scroll"><table>
+      <thead><tr>${cols.map(c => `<th>${esc(c.replace(/_/g," "))}</th>`).join("")}</tr></thead>
+      <tbody>${d.summary.map(r =>
+        `<tr>${cols.map(c => `<td>${esc(r[c])}</td>`).join("")}</tr>`).join("")}
+      </tbody></table></div></div></div>`;
+
+  if (d.wrong.length) {
+    const wc = Object.keys(d.wrong[0]);
+    html += `<div class="card">
+      <div class="eyebrow">Wrong answers · ${num(d.wrong.length)}</div>
+      <div class="help" style="margin:0 0 14px">
+        Pick three per model for the report and say <em>why</em> each failed —
+        a hallucinated column, a missing <code>DISTINCT</code>, the wrong join.
+      </div>
+      <div class="tbl"><div class="scroll"><table>
+        <thead><tr>${wc.map(c => `<th>${esc(c.replace(/_/g," "))}</th>`).join("")}</tr></thead>
+        <tbody>${d.wrong.map(r =>
+          `<tr>${wc.map(c => `<td>${esc(r[c])}</td>`).join("")}</tr>`).join("")}
+        </tbody></table></div></div></div>`;
+  }
+  box.innerHTML = html;
+}
+</script>
+</body>
+</html>

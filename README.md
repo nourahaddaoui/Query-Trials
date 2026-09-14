@@ -54,8 +54,23 @@ ollama serve
 
 ## Run
 
+Check everything first — this takes two seconds and catches the failures that
+otherwise surface forty minutes into a run:
+
+```bash
+python -m src.doctor
+```
+
+Then:
+
 ```bash
 python -m src.run --model all --split test
+```
+
+If a run is interrupted, continue it instead of starting over:
+
+```bash
+python -m src.run --model all --split test --resume 20260914-110716
 ```
 
 Then score and price it:

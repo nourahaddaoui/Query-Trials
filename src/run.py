@@ -48,9 +48,37 @@ def load_items(split, limit):
     return items[:limit] if limit else items
 
 
-def run_one_model(key, items, schema, run_id):
+def already_done(key, run_id):
+    """Which items this run has already recorded for this model.
+
+    Lets a long run pick up where it stopped instead of starting over. The
+    local model on a slow laptop takes a while; losing 40 finished items to a
+    crash at item 41 is painful and entirely avoidable.
+    """
+    path = RAW_DIR / f"{run_id}__{key}.jsonl"
+    if not path.exists():
+        return set()
+    done = set()
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            try:
+                done.add(json.loads(line)["item_id"])
+            except Exception:
+                pass          # a half-written last line - it will be redone
+    return done
+
+
+def run_one_model(key, items, schema, run_id, resume=False):
     model_name = MODELS[key]["name"]
     adapter = adapters.get(key)
+
+    done = already_done(key, run_id) if resume else set()
+    if done:
+        print(f"  resuming - {len(done)} item(s) already recorded, skipping")
+        items = [i for i in items if i["id"] not in done]
+        if not items:
+            print("  nothing left to do for this model")
+            return RAW_DIR / f"{run_id}__{key}.jsonl", [], 0
 
     # The local model loads from disk on its first call. That is real, but it
     # is not what we are measuring, so we throw the first few away - and we
@@ -62,7 +90,8 @@ def run_one_model(key, items, schema, run_id):
     out_path = RAW_DIR / f"{run_id}__{key}.jsonl"
     latencies, errors = [], 0
 
-    with open(out_path, "w", encoding="utf-8") as f:
+    # "a" when resuming so finished items survive; "w" for a fresh run.
+    with open(out_path, "a" if done else "w", encoding="utf-8") as f:
         for n, item in enumerate(items, 1):
             text = prompt_mod.build(schema, item["question"])
             res = adapter.generate(text)
@@ -121,6 +150,8 @@ def main():
     ap.add_argument("--split", default="dev", choices=["dev", "test", "all"])
     ap.add_argument("--limit", type=int, default=0,
                     help="only the first N items (for quick tests)")
+    ap.add_argument("--resume", metavar="RUN_ID",
+                    help="continue an interrupted run, skipping finished items")
     args = ap.parse_args()
 
     db = ROOT / DB_PATH
@@ -133,10 +164,16 @@ def main():
 
     schema = get_schema(str(db))
     keys = ["top", "cheap", "local"] if args.model == "all" else [args.model]
-    run_id = datetime.now().strftime("%Y%m%d-%H%M%S")
+    run_id = args.resume or datetime.now().strftime("%Y%m%d-%H%M%S")
     RAW_DIR.mkdir(parents=True, exist_ok=True)
 
-    print(f"run_id     {run_id}")
+    if args.resume and not list(RAW_DIR.glob(f"{run_id}__*.jsonl")):
+        sys.exit(f"No raw files for run_id '{run_id}'. Available:\n  " +
+                 "\n  ".join(sorted({p.name.split('__')[0]
+                                     for p in RAW_DIR.glob('*.jsonl')}) or
+                             ["(none)"]))
+
+    print(f"run_id     {run_id}" + ("   (resuming)" if args.resume else ""))
     print(f"items      {len(items)}  (split={args.split})")
     print(f"prompt     {prompt_mod.fingerprint()}   temp={TEMPERATURE} "
           f"max_tokens={MAX_TOKENS}")
@@ -148,7 +185,14 @@ def main():
     for key in keys:
         print(f"{MODELS[key]['label']}  ({MODELS[key]['name']})")
         t0 = time.perf_counter()
-        path, lats, errs = run_one_model(key, items, schema, run_id)
+        try:
+            path, lats, errs = run_one_model(key, items, schema, run_id,
+                                             resume=bool(args.resume))
+        except KeyboardInterrupt:
+            print(f"\n\nStopped. Finished items are saved.")
+            print(f"Continue with:  python -m src.run --model {args.model} "
+                  f"--split {args.split} --resume {run_id}")
+            sys.exit(130)
         wall = time.perf_counter() - t0
         summary.append((key, lats, errs, wall))
         print(f"  -> {path.relative_to(ROOT)}   {wall:.0f}s total\n")
@@ -156,13 +200,17 @@ def main():
     print("=" * 58)
     print(f"{'model':<22}{'p50':>9}{'p95':>9}{'mean':>9}{'err':>6}")
     for key, lats, errs, _ in summary:
+        if not lats:
+            print(f"{MODELS[key]['label']:<22}{'(resumed, nothing new)':>32}")
+            continue
         print(f"{MODELS[key]['label']:<22}"
               f"{percentile(lats, 50):>8.0f}m"
               f"{percentile(lats, 95):>8.0f}m"
               f"{statistics.mean(lats):>8.0f}m"
               f"{errs:>6}")
     print("=" * 58)
-    print("\nNothing has been scored yet. Next:  python -m src.score")
+    print("\nThese numbers cover only this session. The full picture comes from")
+    print("the raw files. Nothing has been scored yet - next: python -m src.score")
 
 
 if __name__ == "__main__":

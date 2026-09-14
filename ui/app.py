@@ -28,6 +28,11 @@ from src.sqlutil import parse_sql, is_safe, run_query, get_schema  # noqa: E402
 
 app = Flask(__name__)
 
+# Flask sorts JSON keys alphabetically by default, which silently destroyed the
+# column order of the CSVs - the results table came out with "accuracy" first
+# and "model_name" in the middle. Keep insertion order.
+app.json.sort_keys = False
+
 MAX_PREVIEW_ROWS = 50
 
 
@@ -149,11 +154,15 @@ def results():
             if correct in ("false", "0", "no", "wrong"):
                 wrong.append(r)
 
+    # Send column order explicitly rather than relying on the client to infer
+    # it from object keys - that is what broke before.
     return jsonify({
         "summary": summary,
+        "summary_cols": list(summary[0].keys()) if summary else [],
         "has_per_item": per_item is not None,
         "n_items": len(per_item) if per_item else 0,
         "wrong": wrong[:30],
+        "wrong_cols": list(wrong[0].keys()) if wrong else [],
     })
 
 

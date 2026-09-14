@@ -149,6 +149,24 @@ sequence install → build_db → cache_gold → pytest (31 passing) → doctor 
 score → cost ran to completion. Doctor correctly flagged the missing API key,
 missing Ollama, and the 4 gold items the slow sandbox could not cache.
 
+## 2026-09-14 — The timeout was measuring our laptop, not the model
+
+Hard items started failing with `ReadTimeout ... (read timeout=60)`. The 3B on
+a CPU-only machine generates longer SQL for harder questions and genuinely
+needs more than 60 seconds; the earlier dev run had one item at 60.1s, right
+on the line.
+
+A timeout counts as wrong, so a 60s cap was marking the model wrong for *our
+hardware* rather than for its answer — the opposite of what we are trying to
+measure. Raised `TIMEOUT_S` to 180s. It applies identically to all three
+models, so it remains part of the fairness contract; the two API models never
+approach it.
+
+*Lesson: a timeout is a measurement decision, not a technical detail. Set it
+where it catches genuine failures and not slow-but-working ones — and fix it
+before the graded run, because changing it afterwards invalidates the
+comparison.*
+
 ## Still open
 
 - API key for Opus and Haiku

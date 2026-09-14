@@ -1,0 +1,2 @@
+model_key,model_name,n_items,n_correct,accuracy,p50_ms,p95_ms,mean_ms,n_wrong_result,n_sql_error,n_timeout,n_unsafe,n_parse_error,n_api_error,cost_per_1k_usd
+local,qwen2.5-coder:3b-instruct-q4_K_M,13,10,77%,8731,17684,10979,3,0,0,0,0,0,0.39

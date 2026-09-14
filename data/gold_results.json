@@ -1,0 +1,415 @@
+{
+ "q001": {
+  "hash": "e8eb4256e82c3f92",
+  "n_rows": 1,
+  "n_cols": 1,
+  "ordered": false,
+  "seconds": 0.01
+ },
+ "q002": {
+  "hash": "7895a042a7cbbbb6",
+  "n_rows": 1,
+  "n_cols": 1,
+  "ordered": false,
+  "seconds": 0.0
+ },
+ "q003": {
+  "hash": "c079b3afa65f6af2",
+  "n_rows": 1,
+  "n_cols": 2,
+  "ordered": false,
+  "seconds": 0.0
+ },
+ "q004": {
+  "hash": "afe3129a4239c7a4",
+  "n_rows": 1,
+  "n_cols": 1,
+  "ordered": false,
+  "seconds": 0.69
+ },
+ "q005": {
+  "hash": "3e2ba258b0751a50",
+  "n_rows": 1,
+  "n_cols": 1,
+  "ordered": false,
+  "seconds": 0.28
+ },
+ "q006": {
+  "hash": "0710de70274bbe25",
+  "n_rows": 9,
+  "n_cols": 2,
+  "ordered": true,
+  "seconds": 1.4
+ },
+ "q007": {
+  "hash": "aec30e30272c4fab",
+  "n_rows": 9,
+  "n_cols": 2,
+  "ordered": true,
+  "seconds": 0.58
+ },
+ "q008": {
+  "hash": "5d9f6c80d8c0d8bb",
+  "n_rows": 10,
+  "n_cols": 2,
+  "ordered": true,
+  "seconds": 0.15
+ },
+ "q009": {
+  "hash": "bbb836f1c64ea51f",
+  "n_rows": 2,
+  "n_cols": 2,
+  "ordered": true,
+  "seconds": 0.18
+ },
+ "q010": {
+  "hash": "d7c8661aff53d109",
+  "n_rows": 5,
+  "n_cols": 2,
+  "ordered": true,
+  "seconds": 0.0
+ },
+ "q011": {
+  "hash": "e4192eef9ada4d74",
+  "n_rows": 1,
+  "n_cols": 1,
+  "ordered": false,
+  "seconds": 0.05
+ },
+ "q012": {
+  "hash": "7d1dc931e4a0f0b4",
+  "n_rows": 1,
+  "n_cols": 1,
+  "ordered": false,
+  "seconds": 0.1
+ },
+ "q013": {
+  "hash": "f5a008659f553667",
+  "n_rows": 1,
+  "n_cols": 1,
+  "ordered": false,
+  "seconds": 0.12
+ },
+ "q014": {
+  "hash": "cffd7443c4f4b988",
+  "n_rows": 1,
+  "n_cols": 1,
+  "ordered": false,
+  "seconds": 0.06
+ },
+ "q015": {
+  "hash": "9201a5f10c59523d",
+  "n_rows": 1,
+  "n_cols": 1,
+  "ordered": false,
+  "seconds": 0.05
+ },
+ "q016": {
+  "hash": "9c2b2011b5aac09a",
+  "n_rows": 1,
+  "n_cols": 1,
+  "ordered": false,
+  "seconds": 0.29
+ },
+ "q017": {
+  "hash": "aeae0ccaba4e9ca7",
+  "n_rows": 1,
+  "n_cols": 1,
+  "ordered": false,
+  "seconds": 0.14
+ },
+ "q018": {
+  "hash": "12f572068e3cbe2e",
+  "n_rows": 1,
+  "n_cols": 1,
+  "ordered": false,
+  "seconds": 0.07
+ },
+ "q019": {
+  "hash": "c0e4e4e24de59518",
+  "n_rows": 9,
+  "n_cols": 1,
+  "ordered": true,
+  "seconds": 0.0
+ },
+ "q020": {
+  "hash": "405e88679dc88138",
+  "n_rows": 1,
+  "n_cols": 1,
+  "ordered": false,
+  "seconds": 0.05
+ },
+ "q021": {
+  "hash": "0d23b2b25d5cbb8d",
+  "n_rows": 9,
+  "n_cols": 2,
+  "ordered": true,
+  "seconds": 0.45
+ },
+ "q022": {
+  "hash": "5db87b8be7c3c85c",
+  "n_rows": 9,
+  "n_cols": 2,
+  "ordered": true,
+  "seconds": 0.54
+ },
+ "q023": {
+  "hash": "24dd7bda00a9aff7",
+  "n_rows": 4,
+  "n_cols": 2,
+  "ordered": true,
+  "seconds": 0.34
+ },
+ "q024": {
+  "hash": "d2564f49b304edac",
+  "n_rows": 9,
+  "n_cols": 2,
+  "ordered": true,
+  "seconds": 0.0
+ },
+ "q025": {
+  "hash": "991a8bba5a637dd5",
+  "n_rows": 9,
+  "n_cols": 2,
+  "ordered": true,
+  "seconds": 0.0
+ },
+ "q026": {
+  "hash": "90635cd000e18fd8",
+  "n_rows": 5,
+  "n_cols": 2,
+  "ordered": true,
+  "seconds": 0.31
+ },
+ "q027": {
+  "hash": "bc38f1f718837644",
+  "n_rows": 1,
+  "n_cols": 1,
+  "ordered": true,
+  "seconds": 0.0
+ },
+ "q028": {
+  "hash": "2deba6bf26e74beb",
+  "n_rows": 90899,
+  "n_cols": 2,
+  "ordered": true,
+  "seconds": 0.35
+ },
+ "q029": {
+  "hash": "a8a0d9a388e98fdb",
+  "n_rows": 9,
+  "n_cols": 2,
+  "ordered": true,
+  "seconds": 0.32
+ },
+ "q030": {
+  "hash": "4954d2be10ee4f51",
+  "n_rows": 9,
+  "n_cols": 2,
+  "ordered": true,
+  "seconds": 0.0
+ },
+ "q031": {
+  "hash": "817af48842023028",
+  "n_rows": 131779,
+  "n_cols": 3,
+  "ordered": true,
+  "seconds": 0.83
+ },
+ "q032": {
+  "hash": "d06a6e22b6531044",
+  "n_rows": 2,
+  "n_cols": 2,
+  "ordered": true,
+  "seconds": 0.19
+ },
+ "q033": {
+  "hash": "0d23b2b25d5cbb8d",
+  "n_rows": 9,
+  "n_cols": 2,
+  "ordered": true,
+  "seconds": 1.15
+ },
+ "q034": {
+  "hash": "a7b0e8204d3a1f84",
+  "n_rows": 10,
+  "n_cols": 4,
+  "ordered": true,
+  "seconds": 4.78
+ },
+ "q035": {
+  "hash": "94c319b3f2b7f7a2",
+  "n_rows": 9,
+  "n_cols": 2,
+  "ordered": true,
+  "seconds": 0.0
+ },
+ "q036": {
+  "hash": "308d7285ac65b8fc",
+  "n_rows": 9,
+  "n_cols": 2,
+  "ordered": true,
+  "seconds": 0.76
+ },
+ "q037": {
+  "hash": "481e26620c6bf69d",
+  "n_rows": 120510,
+  "n_cols": 3,
+  "ordered": true,
+  "seconds": 1.16
+ },
+ "q038": {
+  "hash": "f8d2239fb051e795",
+  "n_rows": 9,
+  "n_cols": 3,
+  "ordered": true,
+  "seconds": 0.68
+ },
+ "q039": {
+  "hash": "aec30e30272c4fab",
+  "n_rows": 9,
+  "n_cols": 2,
+  "ordered": true,
+  "seconds": 1.16
+ },
+ "q040": {
+  "hash": "f402cf09ceb4ff81",
+  "n_rows": 5927,
+  "n_cols": 3,
+  "ordered": true,
+  "seconds": 0.19
+ },
+ "q041": {
+  "hash": "4372150bb471c33c",
+  "n_rows": 3,
+  "n_cols": 2,
+  "ordered": true,
+  "seconds": 1.48
+ },
+ "q042": {
+  "hash": "6c0a7c9e77563134",
+  "n_rows": 36538,
+  "n_cols": 4,
+  "ordered": true,
+  "seconds": 0.64
+ },
+ "q044": {
+  "hash": "3c662b613ff352cc",
+  "n_rows": 43906,
+  "n_cols": 1,
+  "ordered": true,
+  "seconds": 11.49
+ },
+ "q045": {
+  "hash": "b59ee239ae2f65b5",
+  "n_rows": 101796,
+  "n_cols": 2,
+  "ordered": true,
+  "seconds": 10.9
+ },
+ "q046": {
+  "hash": "4495e5007ddf83e4",
+  "n_rows": 3,
+  "n_cols": 2,
+  "ordered": true,
+  "seconds": 0.93
+ },
+ "q047": {
+  "hash": "d2f66bf315a2bae5",
+  "n_rows": 140270,
+  "n_cols": 4,
+  "ordered": true,
+  "seconds": 7.71
+ },
+ "q048": {
+  "hash": "7294d9d4a17e7769",
+  "n_rows": 9,
+  "n_cols": 2,
+  "ordered": true,
+  "seconds": 2.52
+ },
+ "q049": {
+  "hash": "acc9f94d883ba832",
+  "n_rows": 1,
+  "n_cols": 2,
+  "ordered": true,
+  "seconds": 1.78
+ },
+ "q050": {
+  "hash": "5feceb66ffc86f38",
+  "n_rows": 0,
+  "n_cols": 0,
+  "ordered": true,
+  "seconds": 1.21
+ },
+ "q051": {
+  "hash": "fdc8d31c1cfe5960",
+  "n_rows": 3,
+  "n_cols": 4,
+  "ordered": true,
+  "seconds": 0.0
+ },
+ "q052": {
+  "hash": "0c19322dfa0825a0",
+  "n_rows": 5,
+  "n_cols": 2,
+  "ordered": true,
+  "seconds": 0.68
+ },
+ "q053": {
+  "hash": "1615a2aeaa009b4e",
+  "n_rows": 9,
+  "n_cols": 1,
+  "ordered": true,
+  "seconds": 1.59
+ },
+ "q054": {
+  "hash": "54ecee2c9486b03b",
+  "n_rows": 3022,
+  "n_cols": 4,
+  "ordered": true,
+  "seconds": 1.15
+ },
+ "q055": {
+  "hash": "f2ac2317870d6789",
+  "n_rows": 1,
+  "n_cols": 1,
+  "ordered": true,
+  "seconds": 0.2
+ },
+ "q056": {
+  "hash": "d5f3a962c44d6381",
+  "n_rows": 13620,
+  "n_cols": 4,
+  "ordered": true,
+  "seconds": 0.25
+ },
+ "q057": {
+  "hash": "bc1538060aeb78cf",
+  "n_rows": 9,
+  "n_cols": 2,
+  "ordered": true,
+  "seconds": 1.29
+ },
+ "q058": {
+  "hash": "c38b27ab3cf94b4f",
+  "n_rows": 7,
+  "n_cols": 5,
+  "ordered": true,
+  "seconds": 1.05
+ },
+ "q059": {
+  "hash": "a523398d7667cd62",
+  "n_rows": 397776,
+  "n_cols": 4,
+  "ordered": true,
+  "seconds": 3.44
+ },
+ "q060": {
+  "hash": "4f72df1151f144e8",
+  "n_rows": 3,
+  "n_cols": 2,
+  "ordered": true,
+  "seconds": 0.43
+ }
+}

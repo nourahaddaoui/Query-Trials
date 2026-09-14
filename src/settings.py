@@ -2,7 +2,18 @@
 
 TEMPERATURE = 0        # no creativity - we want the model's single best answer
 MAX_TOKENS = 300       # enough for a long SQL query, not enough to ramble
-TIMEOUT_S = 60         # a call that takes longer than this counts as a failure
+
+# A call slower than this counts as a failure. It applies to ALL THREE models
+# equally, so it stays part of the fairness contract.
+#
+# Originally 60s. On the CPU-only machine running the 3B, hard questions
+# produce longer SQL and genuinely take longer than that - so a 60s cap was
+# marking the model wrong for our hardware rather than for its answer. Raised
+# to 180s, which the two API models never come close to.
+#
+# MUST be fixed before the graded run and not touched afterwards. Changing it
+# mid-experiment would invalidate the comparison.
+TIMEOUT_S = 180
 
 # Exact model names. Write these in the report, with the date you ran them.
 #

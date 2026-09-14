@@ -9,3 +9,5 @@ pytest
 python-dotenv
 PyYAML
 requests
+reportlab
+pypdf

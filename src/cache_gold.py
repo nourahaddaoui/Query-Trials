@@ -16,6 +16,7 @@ Writes data/gold_results.json. Re-run it if items.jsonl changes.
 """
 
 import json
+import os
 import sqlite3
 import sys
 import time
@@ -26,7 +27,30 @@ from src.sqlutil import result_hash, is_ordered
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT_PATH = ROOT / "data" / "gold_results.json"
-GOLD_TIMEOUT_S = 120  # generous on purpose - this runs once, not 50 times
+
+# Generous on purpose - this runs once, not 50 times. Overridable because a
+# slow machine may need more (GOLD_TIMEOUT_S=300 python -m src.cache_gold).
+#
+# The clean-clone test caught a bug here: the timeout was originally passed to
+# sqlite3.connect(), but that is a LOCK timeout - it does nothing for a slow
+# query, so on a weak machine the script hung forever with no output. The real
+# cap is enforced below with a progress handler, which SQLite calls
+# periodically during query execution and which can interrupt it.
+GOLD_TIMEOUT_S = float(os.environ.get("GOLD_TIMEOUT_S", 120))
+
+
+def run_with_deadline(con, sql, seconds):
+    """Run one query, interrupting it if it exceeds the deadline."""
+    t0 = time.perf_counter()
+
+    def guard():
+        return 1 if time.perf_counter() - t0 > seconds else 0
+
+    con.set_progress_handler(guard, 50_000)   # check every ~50k VM steps
+    try:
+        return con.execute(sql).fetchall(), time.perf_counter() - t0
+    finally:
+        con.set_progress_handler(None, 0)
 
 
 def main():
@@ -38,18 +62,35 @@ def main():
         sys.exit(f"No items at {items_file}")
 
     items = [json.loads(line) for line in open(items_file, encoding="utf-8")]
-    con = sqlite3.connect(f"file:{db}?mode=ro", uri=True, timeout=GOLD_TIMEOUT_S)
+    con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
 
-    cache, failures, slowest = {}, [], []
+    # Resume: keep answers already cached, redo only what is missing. An
+    # interrupted caching run (Ctrl+C, timeout, crash) then costs nothing.
+    cache = {}
+    if OUT_PATH.exists():
+        cache = json.loads(OUT_PATH.read_text())
+        todo = [i for i in items if i["id"] not in cache]
+        if len(todo) < len(items):
+            print(f"  resuming - {len(cache)} already cached, "
+                  f"{len(todo)} to do", flush=True)
+        items = todo
+
+    failures, slowest = [], []
     for item in items:
         sql = item["gold_sql"]
-        t0 = time.perf_counter()
         try:
-            rows = con.execute(sql).fetchall()
+            rows, elapsed = run_with_deadline(con, sql, GOLD_TIMEOUT_S)
+        except sqlite3.OperationalError as e:
+            if "interrupt" in str(e).lower():
+                failures.append((item["id"],
+                                 f"exceeded {GOLD_TIMEOUT_S:.0f}s - raise "
+                                 f"GOLD_TIMEOUT_S or simplify the query"))
+            else:
+                failures.append((item["id"], str(e)[:70]))
+            continue
         except Exception as e:
             failures.append((item["id"], str(e)[:70]))
             continue
-        elapsed = time.perf_counter() - t0
         ordered = is_ordered(sql)
 
         cache[item["id"]] = {
@@ -61,15 +102,21 @@ def main():
         }
         slowest.append((elapsed, item["id"]))
         flag = "  <-- returns nothing" if not rows else ""
-        print(f"  {item['id']}  {elapsed:6.2f}s  {len(rows):>7,} rows{flag}")
+        print(f"  {item['id']}  {elapsed:6.2f}s  {len(rows):>7,} rows{flag}",
+              flush=True)
+        # checkpoint after every item, so an interruption loses nothing
+        OUT_PATH.write_text(json.dumps(cache, indent=1), encoding="utf-8")
 
     con.close()
 
     if failures:
-        print("\nFAILED:")
+        # Still write what succeeded - a partial cache plus a clear error
+        # beats losing everything to one bad query.
+        OUT_PATH.write_text(json.dumps(cache, indent=1), encoding="utf-8")
+        print(f"\nWrote {len(cache)} answers, but {len(failures)} FAILED:")
         for i, e in failures:
             print(f"  {i}: {e}")
-        sys.exit("Fix these before scoring.")
+        sys.exit("Fix these (or raise GOLD_TIMEOUT_S) before scoring.")
 
     empty = [i for i, c in cache.items() if c["n_rows"] == 0]
     if empty:

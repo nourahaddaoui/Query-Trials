@@ -1,0 +1,26 @@
+# List prices used by cost.py. USD per MILLION tokens.
+#
+# date_checked is not decoration - prices change, and a cost table built on
+# stale prices is wrong in a way nobody can see later. Re-check on run day:
+# https://claude.com/pricing
+date_checked: "2026-09-14"
+source: "claude.com/pricing (via web search; VERIFY on the official page before the run)"
+
+api:
+  claude-opus-5:
+    input_per_mtok: 5.00
+    output_per_mtok: 25.00
+  claude-haiku-4-5-20251001:
+    input_per_mtok: 1.00
+    output_per_mtok: 5.00
+
+# The local model has no per-token price. Its cost is the machine's time.
+# Every number here is an assumption - stated so it can be argued with.
+local:
+  hardware_cost_usd: 1000        # what the laptop cost to buy
+  amortisation_years: 3          # we spread that cost over 3 years of use
+  utilisation: 0.25              # fraction of the day it actually does work
+  power_watts: 30                # rough draw under load, fanless laptop
+  electricity_usd_per_kwh: 0.20
+  setup_hours: 6                 # one-off human time to get Ollama working
+  hourly_rate_usd: 15            # what that time is worth

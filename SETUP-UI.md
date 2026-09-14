@@ -22,7 +22,9 @@ Drop these into your repo, keeping the same folder structure.
 
     python -m ui.app
 
-Then open http://localhost:5000
+Then open http://127.0.0.1:5050
+
+If the port is taken, use another: `PORT=5055 python -m ui.app`
 
 ## Notes
 

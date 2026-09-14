@@ -10,12 +10,18 @@ One line per problem: what happened, why, what we did.
 
 ## 2026-09-13 — Setup
 
-**Port 5050 was already taken on macOS.** The Flask UI returned 404 on every
-request and the page came up blank. `lsof -i :5050` showed `ControlCe` —
-macOS AirPlay Receiver listens on 5000 and 5050 by default. Our app was never
-receiving the requests at all. Moved the default to 5055.
+**macOS AirPlay was answering on port 5000.** The Flask UI returned 404 on
+every request and the page came up blank. `lsof -i :5000` showed `ControlCe` —
+macOS AirPlay Receiver binds port 5000, which is Flask's default. Our app was
+never receiving the requests; something else was replying to them. Moved the
+default to 5050.
+
+A second, separate collision followed: `Port 5050 is in use` turned out to be
+our *own* earlier server still running in another window — not AirPlay.
+`PORT=5055` worked around it while we killed the old process.
 *Lesson: when a server "works" but answers wrongly, check that it's actually
-the thing answering.*
+your process answering. A 404 from the wrong server looks identical to a 404
+from yours.*
 
 **Homebrew tried to compile Ollama from source.** On an Intel Mac, Homebrew
 now classes the platform as "Tier 3", so there's no prebuilt bottle — it
@@ -106,6 +112,42 @@ show the raw response when parsing fails.
 *Lesson: an error path that hides the error is worse than no error handling.*
 
 ---
+
+## 2026-09-14 — Clean-clone test (early run, on a slow sandbox machine)
+
+**`requirements.txt` failed on any Python older than 3.12.** It was a frozen
+`pip freeze` from one laptop; `numpy==2.5.3` simply does not exist for the
+clone machine's Python 3.10, so `pip install` died before anything ran.
+Replaced exact pins with loose requirements.
+*Lesson: a freeze file describes one machine, not the project.*
+
+**`cache_gold.py` could hang forever, and its "timeout" was a lie.** The
+120-second timeout was passed to `sqlite3.connect()` — which is a *lock*
+timeout and does nothing for a slow query. On the slow test machine a heavy
+gold query ran indefinitely with zero output. Fixed with a progress-handler
+deadline that genuinely interrupts the query, an env override
+(`GOLD_TIMEOUT_S=300` for slow machines), per-item checkpointing so an
+interrupted caching run resumes instead of restarting, and partial results
+are now written even when some queries fail.
+*Lesson: verify what a timeout parameter actually times.*
+
+**A background process "kept running" only in our heads.** Checks with
+`pgrep -f cache_gold` kept reporting the process alive — but `pgrep -f` was
+matching the checking command's own command line. The process had died long
+before. Verified with `ps aux` instead.
+*Lesson: `pgrep -f X` from a shell whose own command line contains X matches
+itself.*
+
+**The committed dev raw file turned out to be a real run** — Qwen 3B on the
+Intel Mac: 7/10 correct on dev items, but median latency **18.6 s** and one
+item hitting the 60 s adapter timeout. Real numbers, and they say the Intel
+Mac is workable for a one-off 50-item run (~20 min) but marginal; if the
+Windows machine is available for the graded run, use it.
+
+**End-to-end proof:** from a fresh clone with no gitignored files, the
+sequence install → build_db → cache_gold → pytest (31 passing) → doctor →
+score → cost ran to completion. Doctor correctly flagged the missing API key,
+missing Ollama, and the 4 gold items the slow sandbox could not cache.
 
 ## Still open
 

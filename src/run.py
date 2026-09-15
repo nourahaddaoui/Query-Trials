@@ -11,9 +11,13 @@ This is the measurement itself, so it is deliberately boring:
 
 Usage
 -----
-    python -m src.run --model local --split dev          # try 10 practice items
-    python -m src.run --model all   --split test         # the real run
-    python -m src.run --model local --split test --limit 5
+    python -m src.run --model all                # the real run: 60 items x 3 models
+    python -m src.run --model local              # one model, all 60 items
+    python -m src.run --model local --limit 5    # quick smoke test
+
+All 60 items are graded. `--split dev|test` still exists because items.jsonl
+carries those labels from when we were building the harness, but it is not
+used for the reported numbers.
 
 Writes results/raw/<run_id>__<model>.jsonl - one JSON object per line.
 """
@@ -112,6 +116,10 @@ def run_one_model(key, items, schema, run_id, resume=False):
                 "error": res["error"],
                 "prompt_sha": prompt_mod.fingerprint(),
                 "temperature": TEMPERATURE,
+                # False when the provider's SDK does not expose temperature at
+                # all - see src/adapters/_anthropic.py. Recorded per row so the
+                # report states the asymmetry instead of implying we set it.
+                "temperature_set": res.get("temperature_set", True),
                 "max_tokens": MAX_TOKENS,
                 "ts_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             }
@@ -147,7 +155,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", default="local",
                     choices=["top", "cheap", "local", "all"])
-    ap.add_argument("--split", default="dev", choices=["dev", "test", "all"])
+    # We grade all 60 items. The dev/test labels are still in items.jsonl and
+    # were used while building the harness, but the reported numbers cover
+    # every question - the brief asks for at least 50, and we have 60.
+    ap.add_argument("--split", default="all", choices=["dev", "test", "all"])
     ap.add_argument("--limit", type=int, default=0,
                     help="only the first N items (for quick tests)")
     ap.add_argument("--resume", metavar="RUN_ID",

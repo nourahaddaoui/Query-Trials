@@ -91,17 +91,15 @@ def check_items():
         problems.append("duplicate ids")
     if any(not i.get("gold_sql") for i in items):
         problems.append("missing gold_sql")
-    if any(i.get("split") not in ("dev", "test") for i in items):
-        problems.append("bad split value")
-
-    n_test = sum(1 for i in items if i.get("split") == "test")
-    n_dev = len(items) - n_test
-    detail = f"{len(items)} items ({n_dev} dev, {n_test} test)"
+    from collections import Counter
+    diff = Counter(i.get("difficulty") for i in items)
+    detail = (f"{len(items)} items, all graded "
+              f"({diff['easy']} easy, {diff['medium']} medium, {diff['hard']} hard)")
 
     if problems:
         check("items", FAIL, detail + " - " + ", ".join(problems))
-    elif n_test < 50:
-        check("items", WARN, detail + " - the brief wants at least 50 test items")
+    elif len(items) < 50:
+        check("items", WARN, detail + " - the brief wants at least 50")
     else:
         check("items", OK, detail)
     return items
@@ -221,12 +219,12 @@ def main():
         for _, name, _d in fails:
             print(f"  - {name}")
         print("\nThe local model can still run if only the API key failed:")
-        print("  python -m src.run --model local --split dev")
+        print("  python -m src.run --model local")
         sys.exit(1)
 
     print(f"Ready.{f'  ({len(warns)} warning(s))' if warns else ''}")
-    print("  python -m src.run --model local --split dev     # 10 items first")
-    print("  python -m src.run --model all --split test      # the real run")
+    print("  python -m src.run --model local --limit 3   # quick smoke test")
+    print("  python -m src.run --model all               # the real run, 60 items x 3")
 
 
 if __name__ == "__main__":

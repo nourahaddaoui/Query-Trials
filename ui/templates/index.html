@@ -119,6 +119,14 @@
   .seg input{position:absolute;opacity:0;width:0;height:0}
   .seg .dot{width:7px;height:7px;border-radius:50%;flex:0 0 auto;opacity:.9}
   .seg:has(input:checked) .dot{background:#fff !important}
+  /* A model we cannot reach: still selectable, but honest about it. */
+  .seg.off{opacity:.65;border-style:dashed}
+  .seg.off .dot{opacity:.4}
+  .seg.off:has(input:checked){background:#fff;border-color:var(--amber-line);
+                              color:var(--amber);font-weight:500}
+  .seg.off:has(input:checked) .dot{background:var(--amber) !important}
+  .why{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+       color:var(--amber);background:var(--amber-bg);padding:2px 6px;border-radius:4px}
 
   .btn{
     font:inherit;font-size:14px;font-weight:600;color:#fff;background:var(--indigo);
@@ -194,10 +202,26 @@
   }
   td{padding:9px 14px;border-bottom:1px solid var(--line-2);color:var(--ink-2);
      white-space:nowrap}
-  /* SQL is long; let it wrap instead of stretching the table off-screen */
-  td.sqlcell{white-space:normal;max-width:340px;
-             font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:11.5px;
-             line-height:1.5;color:var(--ink-3)}
+  /* SQL is long. Clamp to two lines so rows stay a consistent height; the
+     full text is in the title attribute and in per_item.csv. */
+  td.sqlcell{white-space:normal;max-width:330px;
+             font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:11px;
+             line-height:1.45;color:var(--ink-3);padding-top:7px;padding-bottom:7px}
+  td.sqlcell span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+                  overflow:hidden}
+  td.notecell{white-space:normal;max-width:230px;line-height:1.4;
+              padding-top:7px;padding-bottom:7px;font-size:12px}
+  td.notecell span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+                   overflow:hidden}
+  .pill-status{font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:5px;
+               background:var(--red-bg);color:var(--red);white-space:nowrap}
+
+  /* glossary */
+  .gloss{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));
+         gap:14px 22px;margin-top:4px}
+  .gloss div{font-size:12.5px;line-height:1.5;color:var(--ink-3)}
+  .gloss b{display:block;color:var(--ink);font-size:12px;font-weight:650;
+           margin-bottom:1px}
   tbody tr:last-child td{border-bottom:none}
   tbody tr:hover td{background:#FAFAFB}
 
@@ -227,11 +251,6 @@
     <div class="brand">
       <div class="logo">Q</div>
       <h1>Query Trials</h1>
-    </div>
-    <div class="badges">
-      <span class="pill">3 models</span>
-      <span class="pill plain">temp 0</span>
-      <span class="pill plain">prompt {{ prompt_hash }}</span>
     </div>
   </div>
 </div>
@@ -265,10 +284,16 @@
       <div class="toolbar">
         <div class="segs">
           {% for key, m in models.items() %}
-          <label class="seg">
-            <input type="checkbox" value="{{ key }}" {% if key == 'local' %}checked{% endif %}>
+          <label class="seg {% if not avail[key].ok %}off{% endif %}"
+                 {% if not avail[key].ok %}title="{{ avail[key].reason }}"{% endif %}>
+            <input type="checkbox" value="{{ key }}"
+                   data-ok="{{ 1 if avail[key].ok else 0 }}"
+                   data-reason="{{ avail[key].reason }}"
+                   data-label="{{ m.label }}"
+                   {% if avail[key].ok %}checked{% endif %}>
             <span class="dot" style="background:{{ {'top':'#4F46E5','cheap':'#0EA5E9','local':'#10B981'}[key] }}"></span>
             {{ m.label }}
+            {% if not avail[key].ok %}<span class="why">unavailable</span>{% endif %}
           </label>
           {% endfor %}
         </div>
@@ -327,6 +352,42 @@ $$(".tab").forEach(t => t.onclick = () => {
 
 $$(".chip").forEach(c => c.onclick = () => { $("#q").value = c.dataset.q; $("#q").focus(); });
 
+/* ---------- keep the model chips honest, live ----------
+   Re-checks the API key and Ollama every 10s and whenever you come back to
+   the tab. Paste a key into .env and the Claude models light up on their own;
+   quit Ollama and Qwen goes dim. No restart, no refresh. */
+async function refreshAvailability() {
+  let a;
+  try { a = await (await fetch("/api/availability")).json(); } catch { return; }
+  $$(".seg input").forEach(inp => {
+    const st = a[inp.value];
+    if (!st) return;
+    const was = inp.dataset.ok === "1";
+    inp.dataset.ok = st.ok ? "1" : "0";
+    inp.dataset.reason = st.reason || "";
+
+    const seg = inp.closest(".seg");
+    seg.classList.toggle("off", !st.ok);
+    seg.title = st.reason || "";
+
+    let tag = seg.querySelector(".why");
+    if (!st.ok && !tag) {
+      tag = document.createElement("span");
+      tag.className = "why";
+      tag.textContent = "unavailable";
+      seg.appendChild(tag);
+    } else if (st.ok && tag) {
+      tag.remove();
+    }
+    // A model that just became available gets ticked; one that just died
+    // gets unticked, so Run never silently does nothing.
+    if (!was && st.ok) inp.checked = true;
+    if (was && !st.ok) inp.checked = false;
+  });
+}
+setInterval(refreshAvailability, 10000);
+window.addEventListener("focus", refreshAvailability);
+
 $("#q").addEventListener("keydown", e => {
   if ((e.metaKey || e.ctrlKey) && e.key === "Enter") $("#run").click();
 });
@@ -340,9 +401,23 @@ $("#run").onclick = async () => {
     return;
   }
 
+  // Warn about unreachable models before spending time on the reachable ones.
+  const picked = $$(".seg input:checked");
+  const blocked = picked.filter(i => i.dataset.ok === "0");
+  const usable = picked.filter(i => i.dataset.ok === "1");
+
+  const warnHtml = blocked.length ? `<div class="alert">
+      <strong>Skipping ${blocked.map(i => esc(i.dataset.label)).join(" and ")}</strong>
+      — ${blocked.map(i => esc(i.dataset.reason)).join("; ")}.
+      ${usable.length ? `Running ${usable.map(i => esc(i.dataset.label)).join(" and ")} instead.`
+                      : "Nothing left to run."}
+    </div>` : "";
+
+  if (!usable.length) { $("#out").innerHTML = warnHtml; return; }
+
   $("#run").disabled = true;
-  $("#out").innerHTML = `<div class="card"><div class="loading"><span class="spinner"></span>
-    Running on ${models.length} model${models.length > 1 ? "s" : ""}… the local one takes a moment.</div></div>`;
+  $("#out").innerHTML = warnHtml + `<div class="card"><div class="loading"><span class="spinner"></span>
+    Running on ${usable.length} model${usable.length > 1 ? "s" : ""}… the local one takes a moment.</div></div>`;
 
   try {
     const r = await fetch("/api/ask", {
@@ -363,9 +438,9 @@ $("#run").onclick = async () => {
         <div class="card"><pre class="err">${esc(plain.slice(0, 900))}</pre></div>`;
       return;
     }
-    $("#out").innerHTML = d.error
+    $("#out").innerHTML = warnHtml + (d.error
       ? `<div class="alert bad">${esc(d.error)}</div>`
-      : d.results.map(card).join("");
+      : d.results.map(card).join(""));
   } catch (e) {
     $("#out").innerHTML = `<div class="alert bad">${esc(e)}</div>`;
   } finally {
@@ -452,7 +527,10 @@ async function loadResults(){
   const pick = (avail, wanted) => wanted.filter(c => avail.includes(c));
   const sc = pick(d.summary_cols || Object.keys(d.summary[0]), SUM_COLS);
 
-  let html = `<div class="card">
+  // Glossary first — read the definitions, then the numbers.
+  let html = glossary();
+
+  html += `<div class="card">
     <div class="eyebrow">Summary${d.n_items ? " · " + num(d.n_items) + " graded items" : ""}</div>
     <div class="tbl"><div class="scroll"><table>
       <thead><tr>${sc.map(c => `<th>${esc(SUM_LABEL[c] || c)}</th>`).join("")}</tr></thead>
@@ -461,6 +539,13 @@ async function loadResults(){
       </tbody></table></div></div></div>`;
 
   if (d.wrong.length) {
+    const cell = (c, v) => {
+      const t = esc(v || "—");
+      if (c === "parsed_sql") return `<td class="sqlcell" title="${t}"><span>${t}</span></td>`;
+      if (c === "note")       return `<td class="notecell" title="${t}"><span>${t}</span></td>`;
+      if (c === "status")     return `<td><span class="pill-status">${t}</span></td>`;
+      return `<td>${t}</td>`;
+    };
     const wc = pick(d.wrong_cols || Object.keys(d.wrong[0]), WRONG_COLS);
     html += `<div class="card">
       <div class="eyebrow">Wrong answers · ${num(d.wrong.length)}</div>
@@ -468,15 +553,44 @@ async function loadResults(){
         Pick three per model for the report and say <em>why</em> each failed —
         a hallucinated column, a missing <code>DISTINCT</code>, the wrong join.
         Edit the <code>note</code> column in <code>per_item.csv</code>, then
-        re-run <code>python -m src.make_report</code>.
+        re-run <code>python -m src.make_report</code>. Hover a cell to read it in full.
       </div>
       <div class="tbl"><div class="scroll"><table>
         <thead><tr>${wc.map(c => `<th>${esc(WRONG_LABEL[c] || c)}</th>`).join("")}</tr></thead>
         <tbody>${d.wrong.map(r =>
-          `<tr>${wc.map(c => `<td${c === "parsed_sql" ? ' class="sqlcell"' : ""}>${esc(r[c] || "—")}</td>`).join("")}</tr>`).join("")}
+          `<tr>${wc.map(c => cell(c, r[c])).join("")}</tr>`).join("")}
         </tbody></table></div></div></div>`;
   }
+
   box.innerHTML = html;
+}
+
+function glossary() {
+  return `<div class="card">
+    <div class="eyebrow">What these numbers mean</div>
+    <div class="gloss">
+      <div><b>Accuracy</b>Share of questions where the model's SQL returned the
+        same rows as our reference query. Not the same text — the same result.</div>
+      <div><b>p50</b>The middle latency. Sort all the response times; half were
+        faster than this. Also called the median.</div>
+      <div><b>p95</b>The slow end. 95% of answers arrived faster than this. We
+        report it because one 30-second answer barely moves an average of sixty,
+        but it is exactly what a user notices.</div>
+      <div><b>Wrong</b>The query ran fine but returned different rows than the
+        reference. A real mistake, not a crash.</div>
+      <div><b>Errors</b>Crashed SQL, timeouts, non-<code>SELECT</code> statements,
+        unreadable output, failed API calls. All count as wrong, but are listed
+        separately so the cause is visible.</div>
+      <div><b>$/1k</b>Cost per 1,000 questions. For the APIs: real tokens used ×
+        list price. For the local model: the machine's hourly cost divided by how
+        many questions it answers per hour.</div>
+      <div><b>Tokens</b>Word-pieces. Models read and write them, and APIs bill by
+        them. Most of our input tokens are the database schema, which is sent with
+        every single question.</div>
+      <div><b>Temperature 0</b>Always take the most likely next word instead of
+        sampling. Makes answers repeatable, so a rerun gives the same result.</div>
+    </div>
+  </div>`;
 }
 </script>
 </body>

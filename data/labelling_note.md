@@ -50,20 +50,22 @@ wrong, which is a legitimate difficulty, not a flaw in the question.
  "difficulty": "easy", "split": "dev"}
 ```
 
-| Split | Items | easy | medium | hard |
-|---|---:|---:|---:|---:|
-| dev (practice) | 10 | 5 | 3 | 2 |
-| **test (graded)** | **50** | 10 | 22 | 18 |
-| total | 60 | 15 | 25 | 20 |
+| Difficulty | Items |
+|---|---:|
+| easy | 15 |
+| medium | 25 |
+| hard | 20 |
+| **total (all graded)** | **60** |
 
-The dev items exist so the harness can be tested without touching the 50 that
-produce the reported numbers. `q041` and `q046` were moved into dev (and
-`q009`, `q010` out of it) so that dev contains hard items — otherwise the first
-three-join query with date arithmetic that any model saw would be during the
-real run, and a parsing bug would surface at the worst possible moment.
+**All 60 items are graded.** The brief asks for at least 50; we have 60 and
+report on every one.
 
-Item IDs are stable and are not renumbered when an item changes split. `q041`
-being a dev item is not a mistake.
+The file still carries a `split` field marking 10 items as `dev`. Those were
+the ones we ran repeatedly while building the harness — checking that the
+prompt assembled, that timing was captured, that SQL parsed. We kept the field
+for honesty rather than deleting it: it records which questions we had already
+seen before the graded run. We did not change any question or setting in
+response to how a model answered.
 
 - **easy** — one table, one filter or aggregate
 - **medium** — a join plus `GROUP BY`, or an `ORDER BY … LIMIT`

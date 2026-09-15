@@ -1,19 +1,200 @@
 run_id,item_id,model_key,model_name,difficulty,status,correct,latency_ms,prompt_tokens,completion_tokens,parsed_sql,note
-20260914-142242,q009,local,qwen2.5-coder:3b-instruct-q4_K_M,medium,correct,True,6607.1,307,14,"SELECT gender, COUNT(*) FROM employees GROUP BY gender ORDER BY gender",
-20260914-142242,q010,local,qwen2.5-coder:3b-instruct-q4_K_M,medium,wrong_result,False,7529.8,307,23,"SELECT dept_no, COUNT(*) as count FROM dept_manager GROUP BY dept_no ORDER BY count DESC LIMIT 5","same shape, different values"
-20260914-142242,q011,local,qwen2.5-coder:3b-instruct-q4_K_M,easy,correct,True,8771.1,314,24,SELECT COUNT(emp_no) FROM employees WHERE hire_date < '1990-01-01',
-20260914-142242,q012,local,qwen2.5-coder:3b-instruct-q4_K_M,easy,correct,True,4410.0,303,8,SELECT avg(salary) FROM salaries,
-20260914-142242,q013,local,qwen2.5-coder:3b-instruct-q4_K_M,easy,correct,True,5380.8,303,8,SELECT min(salary) FROM salaries,
-20260914-142242,q014,local,qwen2.5-coder:3b-instruct-q4_K_M,easy,correct,True,7743.6,304,22,SELECT COUNT(*) FROM salaries WHERE to_date = '9999-01-01',
-20260914-142242,q015,local,qwen2.5-coder:3b-instruct-q4_K_M,easy,correct,True,17684.0,305,13,SELECT COUNT(*) FROM employees WHERE first_name = 'Mary',
-20260914-142242,q016,local,qwen2.5-coder:3b-instruct-q4_K_M,easy,correct,True,10041.9,304,10,SELECT COUNT(DISTINCT title) FROM titles,
-20260914-142242,q017,local,qwen2.5-coder:3b-instruct-q4_K_M,easy,correct,True,8874.2,305,8,SELECT SUM(salary) FROM salaries,
-20260914-142242,q018,local,qwen2.5-coder:3b-instruct-q4_K_M,easy,correct,True,11823.2,303,23,SELECT COUNT(*) FROM dept_emp WHERE to_date = '9999-01-01',
-20260914-142242,q019,local,qwen2.5-coder:3b-instruct-q4_K_M,easy,wrong_result,False,8731.0,310,15,SELECT dept_name FROM departments WHERE dept_no LIKE 'd00%',"same shape, different values"
-20260914-142242,q020,local,qwen2.5-coder:3b-instruct-q4_K_M,easy,correct,True,14787.9,314,24,SELECT COUNT(emp_no) FROM employees WHERE birth_date > '1960-01-01',
-20260914-142242,q021,local,qwen2.5-coder:3b-instruct-q4_K_M,medium,wrong_result,False,30338.2,306,69,"SELECT d.dept_name, AVG(s.salary) AS avg_salary
+20260915-103043,q001,local,qwen2.5-coder:3b-instruct-q4_K_M,easy,correct,True,4196.2,304,6,SELECT COUNT(*) FROM employees,
+20260915-103043,q002,local,qwen2.5-coder:3b-instruct-q4_K_M,easy,correct,True,4001.3,304,6,SELECT COUNT(*) FROM departments,
+20260915-103043,q003,local,qwen2.5-coder:3b-instruct-q4_K_M,easy,correct,True,7680.5,312,19,"SELECT first_name, last_name FROM employees WHERE emp_no = 10001",
+20260915-103043,q004,local,qwen2.5-coder:3b-instruct-q4_K_M,easy,correct,True,5971.5,303,8,SELECT max(salary) FROM salaries,
+20260915-103043,q005,local,qwen2.5-coder:3b-instruct-q4_K_M,easy,correct,True,4853.7,302,12,SELECT COUNT(*) FROM employees WHERE gender = 'F',
+20260915-103043,q006,local,qwen2.5-coder:3b-instruct-q4_K_M,medium,correct,True,15667.8,314,49,"SELECT d.dept_name, COUNT(e.emp_no) AS num_employees
+FROM departments d
+JOIN dept_emp e ON d.dept_no = e.dept_no
+GROUP BY d.dept_name
+ORDER BY num_employees DESC",
+20260915-103043,q007,local,qwen2.5-coder:3b-instruct-q4_K_M,medium,wrong_result,False,16050.9,311,46,"SELECT d.dept_name FROM departments d
+JOIN dept_emp de ON d.dept_no = de.dept_no
+GROUP BY d.dept_no
+HAVING COUNT(de.emp_no) > 10000","returned 1 columns, expected 2"
+20260915-103043,q008,local,qwen2.5-coder:3b-instruct-q4_K_M,medium,correct,True,7846.0,313,16,"SELECT emp_no, salary FROM salaries ORDER BY salary ASC LIMIT 10",
+20260915-103043,q009,local,qwen2.5-coder:3b-instruct-q4_K_M,medium,correct,True,6005.9,307,14,"SELECT gender, COUNT(*) FROM employees GROUP BY gender ORDER BY gender",
+20260915-103043,q010,local,qwen2.5-coder:3b-instruct-q4_K_M,medium,wrong_result,False,10946.7,307,31,"SELECT dept_no, COUNT(*) AS dept_manager_count
+FROM dept_manager
+GROUP BY dept_no
+ORDER BY dept_manager_count DESC
+LIMIT 5","same shape, different values"
+20260915-103043,q011,local,qwen2.5-coder:3b-instruct-q4_K_M,easy,correct,True,9307.0,314,24,SELECT COUNT(emp_no) FROM employees WHERE hire_date < '1990-01-01',
+20260915-103043,q012,local,qwen2.5-coder:3b-instruct-q4_K_M,easy,correct,True,3979.3,303,8,SELECT avg(salary) FROM salaries,
+20260915-103043,q013,local,qwen2.5-coder:3b-instruct-q4_K_M,easy,correct,True,4462.7,303,8,SELECT min(salary) FROM salaries,
+20260915-103043,q014,local,qwen2.5-coder:3b-instruct-q4_K_M,easy,correct,True,7707.9,304,22,SELECT COUNT(*) FROM salaries WHERE to_date = '9999-01-01',
+20260915-103043,q015,local,qwen2.5-coder:3b-instruct-q4_K_M,easy,correct,True,5137.1,305,13,SELECT COUNT(*) FROM employees WHERE first_name = 'Mary',
+20260915-103043,q016,local,qwen2.5-coder:3b-instruct-q4_K_M,easy,correct,True,4237.3,304,10,SELECT COUNT(DISTINCT title) FROM titles,
+20260915-103043,q017,local,qwen2.5-coder:3b-instruct-q4_K_M,easy,correct,True,4039.6,305,8,SELECT SUM(salary) FROM salaries,
+20260915-103043,q018,local,qwen2.5-coder:3b-instruct-q4_K_M,easy,correct,True,7742.9,303,23,SELECT COUNT(*) FROM dept_emp WHERE to_date = '9999-01-01',
+20260915-103043,q019,local,qwen2.5-coder:3b-instruct-q4_K_M,easy,wrong_result,False,6376.2,310,15,SELECT dept_name FROM departments WHERE dept_no LIKE 'd00%',"same shape, different values"
+20260915-103043,q020,local,qwen2.5-coder:3b-instruct-q4_K_M,easy,correct,True,9784.1,314,24,SELECT COUNT(emp_no) FROM employees WHERE birth_date > '1960-01-01',
+20260915-103043,q021,local,qwen2.5-coder:3b-instruct-q4_K_M,medium,wrong_result,False,20982.9,306,69,"SELECT d.dept_name, AVG(s.salary) AS avg_salary
 FROM departments d
 JOIN dept_emp de ON d.dept_no = de.dept_no
 JOIN salaries s ON de.emp_no = s.emp_no
 WHERE s.to_date = '9999-01-01'
 GROUP BY d.dept_name","same shape, different values"
+20260915-103043,q022,local,qwen2.5-coder:3b-instruct-q4_K_M,medium,wrong_result,False,18099.7,309,59,"SELECT d.dept_name FROM departments d
+JOIN dept_emp de ON d.dept_no = de.dept_no
+WHERE de.to_date = '9999-01-01'
+GROUP BY d.dept_name
+ORDER BY COUNT(*) ASC
+LIMIT 10","returned 1 columns, expected 2"
+20260915-103043,q023,local,qwen2.5-coder:3b-instruct-q4_K_M,medium,wrong_result,False,7373.8,311,19,SELECT title FROM titles GROUP BY title HAVING COUNT(*) > 50000,"returned 1 columns, expected 2"
+20260915-103043,q024,local,qwen2.5-coder:3b-instruct-q4_K_M,medium,wrong_result,False,8853.7,315,21,"SELECT emp_no, MAX(salary) FROM salaries WHERE emp_no < 10010","returned 1 rows, expected 9"
+20260915-103043,q025,local,qwen2.5-coder:3b-instruct-q4_K_M,medium,wrong_result,False,7027.9,306,18,SELECT dept_no FROM dept_manager GROUP BY dept_no HAVING COUNT(*) >= 2,"returned 1 columns, expected 2"
+20260915-103043,q026,local,qwen2.5-coder:3b-instruct-q4_K_M,medium,wrong_result,False,7322.1,306,18,SELECT first_name FROM employees GROUP BY first_name ORDER BY COUNT(*) DESC LIMIT 5,"returned 1 columns, expected 2"
+20260915-103043,q027,local,qwen2.5-coder:3b-instruct-q4_K_M,medium,correct,True,23764.9,312,31,SELECT title FROM titles WHERE emp_no = 10001 AND to_date = '9999-01-01',
+20260915-103043,q028,local,qwen2.5-coder:3b-instruct-q4_K_M,medium,wrong_result,False,7113.9,306,17,SELECT emp_no FROM salaries GROUP BY emp_no HAVING COUNT(*) > 3,"returned 1 columns, expected 2"
+20260915-103043,q029,local,qwen2.5-coder:3b-instruct-q4_K_M,medium,wrong_result,False,21261.7,306,70,"SELECT d.dept_name, SUM(s.salary) AS total_payroll
+FROM departments d
+JOIN dept_emp de ON d.dept_no = de.dept_no
+JOIN salaries s ON de.emp_no = s.emp_no
+WHERE s.to_date = '9999-01-01'
+GROUP BY d.dept_name","same shape, different values"
+20260915-103043,q030,local,qwen2.5-coder:3b-instruct-q4_K_M,medium,wrong_result,False,13638.3,303,41,SELECT DISTINCT d.dept_name FROM departments d JOIN dept_manager dm ON d.dept_no = dm.dept_no WHERE dm.to_date = '9999-01-01',"returned 1 columns, expected 2"
+20260915-103043,q031,local,qwen2.5-coder:3b-instruct-q4_K_M,medium,wrong_result,False,19784.3,315,61,"SELECT e.emp_no, e.first_name, e.last_name FROM employees e
+JOIN dept_emp de ON e.emp_no = de.emp_no
+WHERE e.hire_date BETWEEN '1980-01-01' AND '1989-12-31'","returned 182068 rows, expected 131779"
+20260915-103043,q032,local,qwen2.5-coder:3b-instruct-q4_K_M,medium,wrong_result,False,17009.0,310,55,"SELECT T2.gender, AVG(T1.salary) AS average_salary
+FROM salaries AS T1
+JOIN employees AS T2 ON T1.emp_no = T2.emp_no
+WHERE T1.to_date = '9999-01-01'","returned 1 rows, expected 2"
+20260915-103043,q033,local,qwen2.5-coder:3b-instruct-q4_K_M,medium,wrong_result,False,23164.4,313,74,"SELECT d.dept_name FROM departments d
+JOIN dept_emp de ON d.dept_no = de.dept_no
+JOIN salaries s ON de.emp_no = s.emp_no
+WHERE s.to_date = '9999-01-01'
+GROUP BY d.dept_no
+HAVING AVG(s.salary) > 60000","returned 1 columns, expected 2"
+20260915-103043,q034,local,qwen2.5-coder:3b-instruct-q4_K_M,medium,wrong_result,False,18027.8,308,50,"SELECT e.first_name, e.last_name, COUNT(t.title) AS title_count
+FROM employees e
+JOIN titles t ON e.emp_no = t.emp_no
+GROUP BY e.emp_no
+ORDER BY title_count DESC
+LIMIT 10","returned 3 columns, expected 4"
+20260915-103043,q035,local,qwen2.5-coder:3b-instruct-q4_K_M,medium,sql_error,False,23202.1,309,81,"SELECT DISTINCT d.dept_name, e.first_name, e.last_name
+FROM departments d
+JOIN dept_manager dm ON d.dept_no = dm.dept_no
+JOIN employees e ON dm.emp_no = e.emp_no
+WHERE dm.to_date = '9999-01-01' AND e.to_date = '9999-01-01'",no such column: e.to_date
+20260915-103043,q036,local,qwen2.5-coder:3b-instruct-q4_K_M,medium,wrong_result,False,14280.9,309,42,"SELECT d.dept_no, MIN(de.from_date) AS earliest_start_date
+FROM departments d
+JOIN dept_emp de ON d.dept_no = de.dept_no
+GROUP BY d.dept_no","same shape, different values"
+20260915-103043,q037,local,qwen2.5-coder:3b-instruct-q4_K_M,medium,wrong_result,False,12367.9,307,37,"SELECT e.emp_no, e.first_name, e.last_name FROM employees e
+JOIN titles t ON e.emp_no = t.emp_no
+WHERE t.title LIKE '%Engineer%'","returned 227881 rows, expected 120510"
+20260915-103043,q038,local,qwen2.5-coder:3b-instruct-q4_K_M,medium,wrong_result,False,21908.8,306,77,"SELECT d.dept_name, MIN(s.salary) AS min_salary, MAX(s.salary) AS max_salary
+FROM departments d
+JOIN dept_emp de ON d.dept_no = de.dept_no
+JOIN salaries s ON de.emp_no = s.emp_no
+WHERE s.to_date = '9999-01-01'
+GROUP BY d.dept_name","same shape, different values"
+20260915-103043,q039,local,qwen2.5-coder:3b-instruct-q4_K_M,medium,wrong_result,False,28416.2,314,94,"SELECT d.dept_name FROM departments d
+JOIN dept_emp de ON d.dept_no = de.dept_no
+JOIN dept_manager dm ON d.dept_no = dm.dept_no
+WHERE de.to_date = '9999-01-01' AND dm.to_date = '9999-01-01'
+GROUP BY d.dept_name
+HAVING COUNT(de.emp_no) > 5000","returned 1 columns, expected 2"
+20260915-103043,q040,local,qwen2.5-coder:3b-instruct-q4_K_M,hard,correct,True,27803.3,317,92,"SELECT e.emp_no, e.first_name, e.last_name
+FROM employees e
+JOIN titles t ON e.emp_no = t.emp_no
+JOIN salaries s ON e.emp_no = s.emp_no
+WHERE t.to_date = '9999-01-01' AND s.to_date = '9999-01-01' AND s.salary > 100000",
+20260915-103043,q041,local,qwen2.5-coder:3b-instruct-q4_K_M,hard,sql_error,False,20783.9,310,69,SELECT dept_name FROM departments WHERE dept_no IN (SELECT dept_no FROM dept_emp WHERE to_date = '9999-01-01' GROUP BY dept_no HAVING avg(salary) > (SELECT avg(salary) FROM dept_emp WHERE to_date = '9999-01-01')),no such column: salary
+20260915-103043,q042,local,qwen2.5-coder:3b-instruct-q4_K_M,hard,wrong_result,False,9344.1,309,28,SELECT emp_no FROM employees WHERE emp_no IN (SELECT emp_no FROM salaries WHERE salary > (SELECT AVG(salary) FROM salaries)),"returned 60453 rows, expected 36538"
+20260915-103043,q043,local,qwen2.5-coder:3b-instruct-q4_K_M,hard,sql_error,False,30185.2,312,97,"SELECT d.dept_name, e.first_name, e.last_name, MAX(s.salary) as highest_salary
+FROM departments d
+JOIN dept_emp de ON d.dept_no = de.dept_no
+JOIN employees e ON de.emp_no = e.emp_no
+JOIN salaries s ON e.emp_no = s.emp_no
+WHERE s.to_date = '9999-01-01'
+GROUP BY d.dept_name, e.first_name, e.last_name",item not in gold cache - re-run cache_gold
+20260915-103043,q044,local,qwen2.5-coder:3b-instruct-q4_K_M,hard,wrong_result,False,41586.2,309,142,"SELECT e.emp_no, e.first_name, e.last_name
+FROM employees e
+JOIN salaries s ON e.emp_no = s.emp_no
+WHERE s.to_date = '9999-01-01'
+  AND e.emp_no NOT IN (
+    SELECT emp_no
+    FROM (
+      SELECT emp_no, MAX(to_date) AS max_to_date
+      FROM salaries
+      GROUP BY emp_no
+    ) AS max_salaries
+    WHERE max_to_date < (
+      SELECT to_date
+      FROM salaries
+      WHERE emp_no = max_salaries.emp_no
+        AND to_date = '9999-01-01'
+    )
+  )","returned 81635 rows, expected 43906"
+20260915-103043,q045,local,qwen2.5-coder:3b-instruct-q4_K_M,hard,wrong_result,False,30910.2,314,107,"SELECT e.emp_no, 
+       (s2.salary - s1.salary) * 100.0 / s1.salary AS salary_increase_percentage
+FROM employees e
+JOIN salaries s1 ON e.emp_no = s1.emp_no
+JOIN salaries s2 ON e.emp_no = s2.emp_no
+WHERE s2.to_date = '9999-01-01' AND s1.to_date = '9999-01-01'
+ORDER BY e.emp_no","returned 81635 rows, expected 101796"
+20260915-103043,q046,local,qwen2.5-coder:3b-instruct-q4_K_M,hard,sql_error,False,28669.0,311,84,"SELECT d.dept_name FROM departments d
+JOIN dept_emp de ON d.dept_no = de.dept_no
+WHERE de.to_date = '9999-01-01'
+GROUP BY d.dept_name
+HAVING COUNT(de.emp_no) > (SELECT AVG(COUNT(emp_no)) FROM dept_emp WHERE to_date = '9999-01-01')",misuse of aggregate function COUNT()
+20260915-103043,q047,local,qwen2.5-coder:3b-instruct-q4_K_M,hard,sql_error,False,10383.6,308,32,SELECT emp_no FROM titles GROUP BY emp_no HAVING COUNT(DISTINCT title) > (SELECT AVG(COUNT(DISTINCT title)) FROM titles),misuse of aggregate function COUNT()
+20260915-103043,q048,local,qwen2.5-coder:3b-instruct-q4_K_M,hard,wrong_result,False,15557.1,310,49,"SELECT d.dept_name, AVG(s.salary) 
+FROM departments d 
+JOIN dept_emp de ON d.dept_no = de.dept_no 
+JOIN salaries s ON de.emp_no = s.emp_no 
+GROUP BY d.dept_name","same shape, different values"
+20260915-103043,q049,local,qwen2.5-coder:3b-instruct-q4_K_M,hard,correct,True,24211.8,311,84,"SELECT d.dept_name, MAX(s.salary) - MIN(s.salary) AS salary_difference
+FROM departments d
+JOIN dept_emp de ON d.dept_no = de.dept_no
+JOIN salaries s ON de.emp_no = s.emp_no
+WHERE s.to_date = '9999-01-01'
+GROUP BY d.dept_name
+ORDER BY salary_difference DESC
+LIMIT 1",
+20260915-103043,q050,local,qwen2.5-coder:3b-instruct-q4_K_M,hard,wrong_result,False,22090.9,308,78,"SELECT e.emp_no, e.first_name, e.last_name FROM employees e
+LEFT JOIN titles t ON e.emp_no = t.emp_no
+LEFT JOIN dept_emp de ON e.emp_no = de.emp_no
+WHERE t.to_date = '9999-01-01' AND de.to_date = '9999-01-01'","returned 240124 rows, expected 0"
+20260915-103043,q051,local,qwen2.5-coder:3b-instruct-q4_K_M,hard,sql_error,False,21098.2,313,70,"SELECT d.dept_name, m.emp_no, m.from_date, m.to_date
+FROM departments d
+JOIN dept_manager dm ON d.dept_no = dm.dept_no
+JOIN employees m ON dm.emp_no = m.emp_no
+GROUP BY d.dept_name
+HAVING COUNT(DISTINCT m.emp_no) > 2",no such column: m.from_date
+20260915-103043,q052,local,qwen2.5-coder:3b-instruct-q4_K_M,hard,correct,True,16875.4,318,47,"SELECT strftime('%Y', hire_date) AS year, COUNT(emp_no) AS num_employees FROM employees WHERE strftime('%Y', hire_date) BETWEEN '1985' AND '1989' GROUP BY year",
+20260915-103043,q053,local,qwen2.5-coder:3b-instruct-q4_K_M,hard,wrong_result,False,17734.5,319,49,"SELECT dept_no FROM dept_emp WHERE strftime('%Y', from_date) BETWEEN '1985' AND '1989' GROUP BY dept_no HAVING COUNT(DISTINCT strftime('%Y', from_date)) = 5","same shape, different values"
+20260915-103043,q054,local,qwen2.5-coder:3b-instruct-q4_K_M,hard,wrong_result,False,11237.4,310,34,"SELECT emp_no FROM titles WHERE emp_no IN (
+    SELECT emp_no FROM titles
+    GROUP BY emp_no
+    HAVING COUNT(*) > 1
+)","returned 283554 rows, expected 3022"
+20260915-103043,q055,local,qwen2.5-coder:3b-instruct-q4_K_M,hard,wrong_result,False,19483.5,314,59,SELECT AVG(salary) FROM salaries WHERE to_date = '9999-01-01' ORDER BY salary LIMIT 1 OFFSET (SELECT COUNT(*) / 2 - 1 FROM salaries WHERE to_date = '9999-01-01'),"returned 0 rows, expected 1"
+20260915-103043,q056,local,qwen2.5-coder:3b-instruct-q4_K_M,hard,wrong_result,False,11889.0,318,28,SELECT emp_no FROM salaries WHERE salary > (SELECT MAX(salary) FROM salaries WHERE emp_no = 10001),"returned 86372 rows, expected 13620"
+20260915-103043,q057,local,qwen2.5-coder:3b-instruct-q4_K_M,hard,wrong_result,False,30827.2,309,98,"SELECT d.dept_name, CAST(COUNT(CASE WHEN e.gender = 'F' THEN 1 ELSE NULL END) AS REAL) * 100 / COUNT(e.emp_no) AS female_percentage
+FROM departments d
+JOIN dept_emp de ON d.dept_no = de.dept_no
+JOIN employees e ON de.emp_no = e.emp_no
+WHERE de.to_date = '9999-01-01'
+GROUP BY d.dept_name","same shape, different values"
+20260915-103043,q058,local,qwen2.5-coder:3b-instruct-q4_K_M,hard,sql_error,False,40722.1,311,134,"SELECT d.dept_name, e.first_name, e.last_name, e.salary
+FROM dept_manager dm
+JOIN employees e ON dm.emp_no = e.emp_no
+JOIN departments d ON dm.dept_no = d.dept_no
+JOIN salaries s ON e.emp_no = s.emp_no
+WHERE s.to_date = '9999-01-01'
+  AND e.salary > (SELECT AVG(salary) FROM salaries WHERE to_date = '9999-01-01' AND emp_no IN (SELECT emp_no FROM dept_manager WHERE to_date = '9999-01-01'))",no such column: e.salary
+20260915-103043,q059,local,qwen2.5-coder:3b-instruct-q4_K_M,medium,wrong_result,False,23778.3,314,57,"SELECT e.emp_no, e.first_name, e.last_name, t.title, t.from_date, t.to_date
+FROM employees e
+JOIN titles t ON e.emp_no = t.emp_no
+WHERE t.to_date - t.from_date > 5 * 365","returned 240124 rows, expected 397776"
+20260915-103043,q060,local,qwen2.5-coder:3b-instruct-q4_K_M,hard,wrong_result,False,30116.9,311,92,"SELECT d.dept_name FROM departments d
+JOIN dept_emp de ON d.dept_no = de.dept_no
+JOIN salaries s ON de.emp_no = s.emp_no
+WHERE s.to_date = '9999-01-01'
+GROUP BY d.dept_name
+HAVING AVG(s.salary) > (SELECT AVG(salary) FROM salaries WHERE to_date = '9999-01-01')","returned 1 columns, expected 2"

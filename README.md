@@ -16,8 +16,9 @@ against the correct answer.
 | Cheap API | Claude Haiku 4.5 | `claude-haiku-4-5-20251001` |
 | Open-weights, run by us | Qwen2.5-Coder 3B Instruct (Q4_K_M) | `qwen2.5-coder:3b-instruct-q4_K_M` |
 
-All three get the identical prompt at temperature 0, the same 50 items in the
-same order, and the same parser.
+All three get the identical prompt, the same 60 items in the same order, and
+the same parser. Temperature 0 where the provider allows it — see the caveat
+under Results.
 
 ---
 
@@ -64,13 +65,13 @@ python -m src.doctor
 Then:
 
 ```bash
-python -m src.run --model all --split test
+python -m src.run --model all        # all 60 questions, all 3 models
 ```
 
 If a run is interrupted, continue it instead of starting over:
 
 ```bash
-python -m src.run --model all --split test --resume 20260914-110716
+python -m src.run --model all --resume 20260915-103043
 ```
 
 Then score and price it:
@@ -83,8 +84,7 @@ python -m src.cost
 Smaller runs while developing:
 
 ```bash
-python -m src.run --model local --split dev            # 10 practice items
-python -m src.run --model cheap --split test --limit 5
+python -m src.run --model local --limit 5     # just the first 5 items
 ```
 
 ## The interface (optional)
@@ -103,16 +103,49 @@ so the project runs from a clean clone whether or not Flask is installed.
 
 ## Results
 
-Run date: _pending_ · Test set: 50 items · Temperature 0 · max_tokens 300
+**Partial — the two API models have not run yet** (no API key at time of
+writing). The local model is complete over all 60 items.
+
+Run `20260915-103043` · 60 items · temperature 0 · max_tokens 300
 
 | Model | Correct | Accuracy | p50 | p95 | Errors | Cost / 1k |
 |---|---:|---:|---:|---:|---:|---:|
-| Claude Opus 5 | — / 50 | — | — | — | — | — |
-| Claude Haiku 4.5 | — / 50 | — | — | — | — | — |
-| Qwen2.5-Coder 3B | — / 50 | — | — | — | — | — |
+| Claude Opus 5 | — | — | — | — | — | — |
+| Claude Haiku 4.5 | — | — | — | — | — | — |
+| Qwen2.5-Coder 3B | 21 / 60 | 35% | 14.3 s | 30.8 s | 7 | see `src/cost.py` |
 
-Filled in from `results/summary.csv` after the run. Hardware for the local
-model is in `results/hardware.md`.
+### Accuracy by difficulty — the interesting part
+
+| Difficulty | Qwen 3B |
+|---|---:|
+| easy (single table, one filter) | 14 / 15 |
+| medium (a join plus an aggregate) | 4 / 25 |
+| hard (2+ joins, subquery, date logic) | 3 / 20 |
+
+A 3B model is near-perfect on single-table questions and collapses as soon as
+joins appear. The headline 35% hides that completely, which is why the report
+breaks it out.
+
+### Two caveats on the 35%
+
+**It is a floor, not a true figure.** Some `wrong_result` items are a scoring
+artifact: we compared row *order* whenever the reference query had an
+`ORDER BY`, but most of ours have one for determinism rather than because the
+question asked for an order. A correct answer returned in a different order was
+marked wrong. See `NOTES.md`.
+
+**Temperature 0 was not applied to the API models.** The installed Anthropic
+SDK removed the parameter; the local model is pinned to greedy decoding, the
+API models use the provider default. Recorded per row as `temperature_set` and
+discussed in the postmortem rather than glossed over.
+
+Regenerate everything from the raw answers:
+
+```bash
+python -m src.score && python -m src.cost && python -m src.make_report
+```
+
+Hardware for the local model is in `results/hardware.md`.
 
 ---
 

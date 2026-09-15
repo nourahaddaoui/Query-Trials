@@ -167,6 +167,32 @@ where it catches genuine failures and not slow-but-working ones — and fix it
 before the graded run, because changing it afterwards invalidates the
 comparison.*
 
+## 2026-09-15 — The API SDK has no temperature parameter
+
+The first full three-model run failed **all 120 API calls** with
+`TypeError: Messages.create() got an unexpected keyword argument
+'temperature'`. Not a typo on our side: the installed Anthropic SDK (1.5.0)
+removed `temperature` from `messages.create()` entirely.
+
+This is awkward, because temperature 0 is part of our fairness contract. The
+local model is pinned to greedy decoding; the API models now use whatever
+default the provider applies, and we cannot override it.
+
+We did **not** quietly delete the argument. The adapter now probes the SDK
+once at import, passes `temperature` only if it is supported, and records
+`temperature_set: true/false` on every result row. The report states the
+asymmetry rather than claiming a setting we never applied.
+
+*Lesson: when the environment refuses a setting your methodology depends on,
+record the refusal. A silent fallback would have produced a report claiming
+temperature 0 for all three models, which would have been false.*
+
+Related: this surfaced only because we had loosened `requirements.txt` from
+pinned versions to open ones (itself a fix for the clean-clone test). Loose
+requirements make the project portable and make the SDK a moving target. Worth
+pinning `anthropic` specifically once the graded run is done, so the result is
+reproducible.
+
 ## Still open
 
 - API key for Opus and Haiku

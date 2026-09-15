@@ -125,7 +125,7 @@ def main():
     if not any(r.get("cost_per_1k_usd") for r in summary):
         print("WARNING: no cost figures in summary.csv - run python -m src.cost")
 
-    n_test = sum(1 for i in items.values() if i["split"] == "test")
+    n_test = len(items)          # all items are graded
     run_id = per_item[0]["run_id"] if per_item else "?"
     example = items.get("q027") or next(iter(items.values()))
 
@@ -156,8 +156,8 @@ def main():
           "'9999-01-01'</font> rather than NULL; several questions depend on "
           "it, and models that assume NULL get them wrong. That is legitimate "
           "difficulty, not a flawed question."),
-        P(f"60 questions written by hand: 10 dev (for testing the harness) and "
-          f"<b>{n_test} test</b> (graded). Every reference query was executed "
+        P(f"<b>{n_test} questions</b> written by hand, all of them graded — the "
+          f"brief asks for at least 50. Every reference query was executed "
           "before any model ran, and its row count checked. Two items were "
           "replaced at that stage because they returned nothing by "
           "construction: one asked which departments have no current manager "
@@ -273,7 +273,7 @@ def main():
           "in src/prices.yaml with the date the prices were checked."),
         Spacer(1, 4),
         P("Reproduce: <font face='Courier' size='7'>python -m src.doctor && "
-          "python -m src.run --model all --split test && python -m src.score "
+          "python -m src.run --model all && python -m src.score "
           "&& python -m src.cost</font>", "note"),
     ]
 
